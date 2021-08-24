@@ -3,9 +3,10 @@
 # In our banking system, account number should be unique.
 # And the whole card number should be 16-digit length.
 import random
-accounts_list = []
 
 class BankAccount:
+
+    accounts_list = []
 
     def __init__(self):
         self.card_number = '4000000000000000'
@@ -32,10 +33,6 @@ class BankAccount:
         elif menu_action == '0':
             actions['0']()
 
-        # actions[input('1. Create an account\n'
-        #               '2. Log into account\n'
-        #               '0. Exit\n')]()
-
     def create_account(self, card_number, pin):
         """
         Generates 16-digit unique number
@@ -46,16 +43,16 @@ class BankAccount:
 
         while True:
             self.card_generator(self.card_number, self.pin)
-            if self.card_generator(self.card_number, self.pin) in accounts_list:
+            if self.card_generator(self.card_number, self.pin) in self.accounts_list:
                 self.card_generator(self.card_number, self.pin)
             else:
-                #self.card_number = card_number
-                accounts_list.append(self.card_generator(self.card_number, self.pin))
+
+                self.accounts_list.append(self.card_generator(self.card_number, self.pin))
                 break
 
         print('Your card has been created')
-        print(f'Your card number:\n{accounts_list[len(accounts_list)-1][0]}')
-        print(f'Your card PIN:\n{accounts_list[len(accounts_list)-1][1]}')
+        print(f'Your card number:\n{self.accounts_list[len(self.accounts_list)-1][0]}')
+        print(f'Your card PIN:\n{self.accounts_list[len(self.accounts_list)-1][1]}')
         self.main_menu()
 
 
@@ -76,7 +73,7 @@ class BankAccount:
         Takes input from user - Card information and PIN
         :return:
         """
-        if (input('Enter your card number:\n'),input('Enter your PIN:\n')) in accounts_list:
+        if (input('Enter your card number:\n'),input('Enter your PIN:\n')) in self.accounts_list:
             print('You have successfully logged in!')
             self.logged_menu()
         else:
