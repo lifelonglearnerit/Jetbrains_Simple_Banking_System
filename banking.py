@@ -14,11 +14,6 @@ class BankAccount:
         self.main_menu()
 
     def main_menu(self):
-        """
-        Displays the main menu and allow to make choice.
-        Choice will invoke other functions
-        :return:
-        """
         actions = {'1': self.create_account,
                    '2': self.log_to_account,
                    '0': self.exit
@@ -33,13 +28,18 @@ class BankAccount:
         elif menu_action == '0':
             actions['0']()
 
+    def luhn_check_sum(self, card):
+
+        luhn_stage2 = [int(x) if (i + 1) % 2 == 0 else int(x) * 2 for i, x in enumerate(card)]
+        luhn_stage3 = [x - 9 if x > 9 else x for x in luhn_stage2]
+        if sum(luhn_stage3) % 10 > 0:
+            ch_sum = 10 - (sum(luhn_stage3) % 10)
+        else:
+            ch_sum = 0
+
+        return str(ch_sum)
+
     def create_account(self, card_number, pin):
-        """
-        Generates 16-digit unique number
-        Generates 4 digit PIN in range 0000 - 9999
-        Creates object of the class BankAccount
-        :return:
-        """
 
         self.accounts_list.append(self.card_generator(self.card_number, self.pin))
         # while True:
@@ -57,18 +57,18 @@ class BankAccount:
         else:
             print(f'Your card number:\n{self.accounts_list[0][0]}')
         print(f'Your card PIN:\n{self.accounts_list[len(self.accounts_list) - 1][1]}')
-        print(self.accounts_list)
+        # print(self.accounts_list)
         self.main_menu()
 
     def card_generator(self, card_number, pin):
-        print(type(card_number))
         for i in range(6, 15):
             self.card_number = list(self.card_number)
             self.card_number[i] = str(random.randint(0, 8))
-        print('to jest przed luhna', self.card_number)
-        self.card_number.append(self.luhn_check_sum(self.card_number))
+        self.card_number.pop(-1)
+        check_sum = self.luhn_check_sum(self.card_number)
+        self.card_number.append(check_sum)
         self.card_number = "".join(self.card_number)
-        print(self.card_number)
+
         for x in range(4):
             self.pin = list(self.pin)
             self.pin[x] = str(random.randint(0, 9))
@@ -76,10 +76,7 @@ class BankAccount:
         return self.card_number, self.pin
 
     def log_to_account(self):
-        """
-        Takes input from user - Card information and PIN
-        :return:
-        """
+
         if (input('Enter your card number:\n'), input('Enter your PIN:\n')) in self.accounts_list:
             print('You have successfully logged in!')
             self.logged_menu()
@@ -113,20 +110,9 @@ class BankAccount:
     def exit(self):
         exit()
 
-    def luhn_check_sum(self, card):
-        print('luna',type(card))
-        print('dlugosc numeru karty:',len(card))
-        print('to trafia do luny', card)
-        luhn_stage2 = [int(x) if (i + 1) % 2 == 0 else int(x) * 2 for i, x in enumerate(card)]
-        luhn_stage3 = [x - 9 if x > 9 else x for x in luhn_stage2]
-        if sum(luhn_stage3) % 10 > 0:
-            ch_sum = 10 - (sum(luhn_stage3) % 10)
-            print('to jest w lunie', ch_sum)
-        card.pop(-1)
-        card.insert(len(card),str(ch_sum))
-        print('to wychodzi lunie', card)
-        print('dlugosc numeru na wyjsciu:', len(card))
-        return str(ch_sum)
 
+    def exit(self):
+        print('Bye!')
+        exit()
 
 BankAccount()
