@@ -4,8 +4,8 @@
 # And the whole card number should be 16-digit length.
 import random
 
-class BankAccount:
 
+class BankAccount:
     accounts_list = []
 
     def __init__(self):
@@ -41,27 +41,34 @@ class BankAccount:
         :return:
         """
 
-        while True:
-            self.card_generator(self.card_number, self.pin)
-            if self.card_generator(self.card_number, self.pin) in self.accounts_list:
-                self.card_generator(self.card_number, self.pin)
-            else:
-
-                self.accounts_list.append(self.card_generator(self.card_number, self.pin))
-                break
+        self.accounts_list.append(self.card_generator(self.card_number, self.pin))
+        # while True:
+        #     self.card_generator(self.card_number, self.pin)
+        #     if self.card_generator(self.card_number, self.pin) in self.accounts_list:
+        #         self.card_generator(self.card_number, self.pin)
+        #     else:
+        #
+        #         self.accounts_list.append(self.card_generator(self.card_number, self.pin))
+        #         break
 
         print('Your card has been created')
-        print(f'Your card number:\n{self.accounts_list[len(self.accounts_list)-1][0]}')
-        print(f'Your card PIN:\n{self.accounts_list[len(self.accounts_list)-1][1]}')
+        if len(self.accounts_list) >= 1:
+            print(f'Your card number:\n{self.accounts_list[len(self.accounts_list) - 1][0]}')
+        else:
+            print(f'Your card number:\n{self.accounts_list[0][0]}')
+        print(f'Your card PIN:\n{self.accounts_list[len(self.accounts_list) - 1][1]}')
+        print(self.accounts_list)
         self.main_menu()
 
-
     def card_generator(self, card_number, pin):
-
-        for i in range(7,16):
+        print(type(card_number))
+        for i in range(6, 15):
             self.card_number = list(self.card_number)
-            self.card_number[i] = str(random.randint(0, 9))
-            self.card_number = "".join(self.card_number)
+            self.card_number[i] = str(random.randint(0, 8))
+        print('to jest przed luhna', self.card_number)
+        self.card_number.append(self.luhn_check_sum(self.card_number))
+        self.card_number = "".join(self.card_number)
+        print(self.card_number)
         for x in range(4):
             self.pin = list(self.pin)
             self.pin[x] = str(random.randint(0, 9))
@@ -73,7 +80,7 @@ class BankAccount:
         Takes input from user - Card information and PIN
         :return:
         """
-        if (input('Enter your card number:\n'),input('Enter your PIN:\n')) in self.accounts_list:
+        if (input('Enter your card number:\n'), input('Enter your PIN:\n')) in self.accounts_list:
             print('You have successfully logged in!')
             self.logged_menu()
         else:
@@ -82,9 +89,9 @@ class BankAccount:
 
     def logged_menu(self):
         logged_actions = {'1': self.account_balance,
-                   '2': self.log_out,
-                   '0': self.exit
-                   }
+                          '2': self.log_out,
+                          '0': self.exit
+                          }
         menu_logged = input('1. Balance\n'
                             '2. Log out\n'
                             '0. Exit\n')
@@ -105,6 +112,20 @@ class BankAccount:
 
     def exit(self):
         exit()
+
+    def luhn_check_sum(self, card):
+        print('luna',type(card))
+        print('dlugosc numeru karty:',len(card))
+        print('to trafia do luny', card)
+        luhn_stage2 = [int(x) if (i + 1) % 2 == 0 else int(x) * 2 for i, x in enumerate(card)]
+        luhn_stage3 = [x - 9 if x > 9 else x for x in luhn_stage2]
+        if sum(luhn_stage3) % 10 > 0:
+            ch_sum = 10 - (sum(luhn_stage3) % 10)
+            print('to jest w lunie', ch_sum)
+        card.append(str(ch_sum))
+        print('to wychodzi lunie', card)
+        print('dlugosc numeru na wyjsciu:', len(card))
+        return str(ch_sum)
 
 
 BankAccount()
