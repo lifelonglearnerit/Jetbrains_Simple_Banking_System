@@ -122,7 +122,8 @@ class BankAccount:
         if sum(luhn_stage3) % 10 > 0:
             ch_sum = 10 - (sum(luhn_stage3) % 10)
             print('to jest w lunie', ch_sum)
-        card.append(str(ch_sum))
+        card.pop(-1)
+        card.insert(len(card),str(ch_sum))
         print('to wychodzi lunie', card)
         print('dlugosc numeru na wyjsciu:', len(card))
         return str(ch_sum)
