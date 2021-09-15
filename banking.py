@@ -12,11 +12,12 @@ class BankAccount:
     db = sqlite3.connect('card.s3db')
     cur = db.cursor()
     cur.execute('CREATE TABLE IF NOT EXISTS card ('
-                '   id INT,'
-                '   number VARCHAR(16),'
-                '   pin VARCHAR(4),'
-                '   balance INT DEFAULT 0'
+                '   id INTEGER,'
+                '   number TEXT,'
+                '   pin TEXT,'
+                '   balance INTEGER DEFAULT 0'
                 '     );')
+    db.commit()
 
     # list of accounts will be not needed since we have db
     # accounts_list = []
@@ -58,16 +59,16 @@ class BankAccount:
         #self.accounts_list.append(self.card_generator(self.card_number, self.pin))
         self.cur.execute(f'INSERT INTO card (number, pin) VALUES ({gen_card_number}, {gen_pin_number});')
         self.db.commit()
-        self.cur.execute(f'SELECT * FROM card;')
+        #self.cur.execute(f'SELECT * FROM card;')
 
         print('Your card has been created')
         print(f'Your card number:\n{gen_card_number}')
         print(f'Your card pin:\n{gen_pin_number}')
         # below code is just for debugging
-        print(self.cur.fetchall())
-        #self.cur.execute(f'DELETE FROM card;')
-        #self.db.commit()
         #print(self.cur.fetchall())
+        # self.cur.execute(f'DELETE FROM card;')
+        # self.db.commit()
+        # print(self.cur.fetchall())
 
         # CHANGE IT FOR QUERY TO COMPARE EXISTING NUMBER WITH GENERATED - REGEX?
         # if len(self.accounts_list) >= 1:
@@ -101,7 +102,12 @@ class BankAccount:
         return self.pin_number
 
     def card_check(self, _card_number, _pin_number):
-        self.cur.execute(f'SELECT number, pin FROM card  WHERE number = "{_card_number}" AND pin = "{_pin_number}";')
+        self.cur.execute(f'SELECT number, pin '
+                         f'FROM '
+                         f'     card  '
+                         f'WHERE '
+                         f'     number = "{_card_number}" '
+                         f'     AND pin = "{_pin_number}";')
         result = self.cur.fetchall()
         if len(result) == 0:
             return False
@@ -136,7 +142,15 @@ class BankAccount:
 
 
     def account_balance(self):
-        print('Balance: 0')
+        self.cur.execute(f'SELECT balance '
+                         f'FROM '
+                         f'     card  '
+                         f'WHERE '
+                         f'     number = "{self.card_number}" '
+                         f'     AND pin = "{self.pin_number}";')
+        #print('card number: ', self.card_number)
+        balance = self.cur.fetchall()
+        print(f'Balance: {balance[0][0]}')
         self.logged_menu()
 
     def log_out(self):
