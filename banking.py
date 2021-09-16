@@ -8,7 +8,6 @@ import sqlite3
 
 class BankAccount:
 
-    # database creation
     db = sqlite3.connect('card.s3db')
     cur = db.cursor()
     cur.execute('CREATE TABLE IF NOT EXISTS card ('
@@ -19,8 +18,6 @@ class BankAccount:
                 '     );')
     db.commit()
 
-    # list of accounts will be not needed since we have db
-    # accounts_list = []
     def __init__(self):
         self.card_number = '4000000000000000'
         self.pin_number = '0000'
@@ -56,10 +53,8 @@ class BankAccount:
     def create_account(self, card_number, pin_number):
         gen_card_number = self.card_generator(card_number)
         gen_pin_number = self.pin_generator(pin_number)
-        #self.accounts_list.append(self.card_generator(self.card_number, self.pin))
         self.cur.execute(f'INSERT INTO card (number, pin) VALUES ({gen_card_number}, {gen_pin_number});')
         self.db.commit()
-        #self.cur.execute(f'SELECT * FROM card;')
 
         print('Your card has been created')
         print(f'Your card number:\n{gen_card_number}')
@@ -69,17 +64,6 @@ class BankAccount:
         # self.cur.execute(f'DELETE FROM card;')
         # self.db.commit()
         # print(self.cur.fetchall())
-
-        # CHANGE IT FOR QUERY TO COMPARE EXISTING NUMBER WITH GENERATED - REGEX?
-        # if len(self.accounts_list) >= 1:
-        #     print(f'Your card number:\n{self.accounts_list[len(self.accounts_list) - 1][0]}')
-        # else:
-        #     print(f'Your card number:\n{self.accounts_list[0][0]}')
-
-        # self.cur.execute(f'INSERT INTO card (pin) VALUES ({self.pin_generator(pin)});')
-        # self.db.commit()
-        #print(f'Your card PIN:\n{self.accounts_list[len(self.accounts_list) - 1][1]}')
-        # print(self.accounts_list)
         self.main_menu()
 
     def card_generator(self, card_number):
@@ -125,20 +109,30 @@ class BankAccount:
 
     def logged_menu(self):
         logged_actions = {'1': self.account_balance,
-                          '2': self.log_out,
+                          '2': self.add_income,
+                          '3': self.do_transfer,
+                          '4': self.close_account,
+                          '5': self.log_out,
                           '0': self.exit
                           }
         menu_logged = input('1. Balance\n'
-                            '2. Log out\n'
+                            '2. Add income\n'
+                            '3. Do transfer\n'
+                            '4. Close account\n'
+                            '5. Log out\n'
                             '0. Exit\n')
         if menu_logged == '1':
             logged_actions['1']()
         elif menu_logged == '2':
             logged_actions['2']()
+        elif menu_logged == '3':
+            logged_actions['3']()
+        elif menu_logged == '4':
+            logged_actions['4']()
+        elif menu_logged == '5':
+            logged_actions['5']()
         elif menu_logged == '0':
             logged_actions['0']()
-
-
 
 
     def account_balance(self):
@@ -148,18 +142,26 @@ class BankAccount:
                          f'WHERE '
                          f'     number = "{self.card_number}" '
                          f'     AND pin = "{self.pin_number}";')
-        #print('card number: ', self.card_number)
+        print('card number: ', self.card_number)
         balance = self.cur.fetchall()
         print(f'Balance: {balance[0][0]}')
         self.logged_menu()
 
+    def add_income(self):
+        print('income added')
+        self.exit()
+
+    def do_transfer(self):
+        print('transfer made')
+        self.exit()
+
+    def close_account(self):
+        print('account closed')
+        self.exit()
+
     def log_out(self):
         print('You have successfully logged out!')
         self.main_menu()
-
-    def exit(self):
-        exit()
-
 
     def exit(self):
         print('Bye!')
