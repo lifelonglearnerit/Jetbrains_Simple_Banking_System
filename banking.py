@@ -61,9 +61,12 @@ class BankAccount:
         print(f'Your card pin:\n{gen_pin_number}')
         # below code is just for debugging
         #print(self.cur.fetchall())
+
+        """#######################################################"""
         # self.cur.execute(f'DELETE FROM card;')
         # self.db.commit()
         # print(self.cur.fetchall())
+        """#######################################################"""
         self.main_menu()
 
     def card_generator(self, card_number):
@@ -76,8 +79,6 @@ class BankAccount:
         self.card_number = "".join(self.card_number)
         return self.card_number
 
-
-    # NEW METHOD FOR PIN
     def pin_generator(self, pin_number):
         for x in range(4):
             self.pin_number = list(self.pin_number)
@@ -148,8 +149,24 @@ class BankAccount:
         self.logged_menu()
 
     def add_income(self):
-        print('income added')
-        self.exit()
+        """
+        UPDATE
+        table_name
+        SET
+        column1 = value1, column2 = value2...., columnN = valueN
+        WHERE[condition];
+        """
+        add = int(input('Enter income:\n'))
+        self.cur.execute(f'UPDATE '
+                         f'     card '
+                         f'SET '
+                         f'     balance = {add} '
+                         f'WHERE'
+                         f'     number = "{self.card_number}";')
+        self.db.commit()
+        print('Income was added!')
+        print(f'to card number: {self.card_number}')
+        self.logged_menu()
 
     def do_transfer(self):
         print('transfer made')
