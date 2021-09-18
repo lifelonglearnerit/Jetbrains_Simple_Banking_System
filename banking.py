@@ -1,7 +1,3 @@
-# In our banking system, credit cards should begin with 4.
-# In our banking system, the IIN must be 400000.
-# In our banking system, account number should be unique.
-# And the whole card number should be 16-digit length.
 import random
 import sqlite3
 
@@ -94,10 +90,11 @@ class BankAccount:
                          f'     number = "{_card_number}" '
                          f'     AND pin = "{_pin_number}";')
         result = self.cur.fetchall()
-        if len(result) == 0:
-            return False
-        else:
+        if len(result):
+            self.card_number = _card_number
             return True
+        else:
+            return False
 
     def log_to_account(self):
 
@@ -109,7 +106,8 @@ class BankAccount:
             self.main_menu()
 
     def logged_menu(self):
-        logged_actions = {'1': self.account_balance,
+        print(self.card_number)
+        logged_actions = {'1': self.balance_print,
                           '2': self.add_income,
                           '3': self.do_transfer,
                           '4': self.close_account,
@@ -134,47 +132,110 @@ class BankAccount:
             logged_actions['5']()
         elif menu_logged == '0':
             logged_actions['0']()
+# testing idea of printing function to reuse account_balance in other part of program
+# without the need to comback to logged_menu.
+    def balance_print(self):
 
+        print(f'Balance: {self.account_balance()}')
+        self.logged_menu()
 
     def account_balance(self):
         self.cur.execute(f'SELECT balance '
                          f'FROM '
                          f'     card  '
                          f'WHERE '
-                         f'     number = "{self.card_number}" '
-                         f'     AND pin = "{self.pin_number}";')
-        print('card number: ', self.card_number)
+                         f'     number = "{self.card_number}";')
+
+        # print('card number: ', self.card_number) # tylko debugging DO USUNIECIA
         balance = self.cur.fetchall()
-        print(f'Balance: {balance[0][0]}')
-        self.logged_menu()
+        return balance[0][0]
+        #print(f'Balance: {balance[0][0]}')
+        #self.logged_menu()
 
     def add_income(self):
-        """
-        UPDATE
-        table_name
-        SET
-        column1 = value1, column2 = value2...., columnN = valueN
-        WHERE[condition];
-        """
         add = int(input('Enter income:\n'))
+        new_balance_add = add + self.account_balance()
         self.cur.execute(f'UPDATE '
                          f'     card '
                          f'SET '
-                         f'     balance = {add} '
+                         f'     balance = {new_balance_add} '
                          f'WHERE'
                          f'     number = "{self.card_number}";')
         self.db.commit()
         print('Income was added!')
-        print(f'to card number: {self.card_number}')
+        # print(f'to card number: {self.card_number}') # THIS NEED TO BE REMOVED. JUST FOR DEBUGGING
         self.logged_menu()
 
+    def card_exists(self, reciever_card):
+        self.cur.execute(f'SELECT number '
+                         f'FROM '
+                         f'     card  '
+                         f'WHERE '
+                         f'     number = "{reciever_card}";')
+        # JAKIE SA OGRANICZENIA SQLITE VS SQL
+        result = self.cur.fetchall()
+        if len(result):
+            return True
+        else:
+            return False
+
+    def money_transfer_recv(self,transfer_amount, reciver_card):
+        self.cur.execute(f'SELECT balance '
+                                          f'FROM '
+                                          f'     card  '
+                                          f'WHERE '
+                                          f'     number = "{reciver_card}";')
+        current_amount = self.cur.fetchall()
+        new_balance_recv = current_amount[0][0] + transfer_amount
+
+        self.cur.execute(f'UPDATE '
+                         f'     card '
+                         f'SET '
+                         f'     balance = {new_balance_recv} '
+                         f'WHERE'
+                         f'     number = "{reciver_card}";')
+        self.db.commit()
+
+    def money_transfer_send(self, transfer_amount):
+        new_balance = self.account_balance() - transfer_amount
+        self.cur.execute(f'UPDATE '
+                         f'     card '
+                         f'SET '
+                         f'     balance = {new_balance} '
+                         f'WHERE'
+                         f'     number = "{self.card_number}";')
+        self.db.commit()
+
     def do_transfer(self):
-        print('transfer made')
-        self.exit()
+        print('Transfer')
+        # STAGE1 check sum check in luhn
+        reciver_card = input('Enter card number:\n')
+        reciver_card_check = reciver_card[0: len(reciver_card) - 1]
+        luhn_check_sum = self.luhn_check_sum(reciver_card_check)
+        if reciver_card[-1] == luhn_check_sum:
+            if self.card_exists(reciver_card):
+                transfer_amount = int(input('Enter how much money you want to transfer:\n'))
+                if self.account_balance() >= transfer_amount:
+                    self.money_transfer_recv(transfer_amount, reciver_card)
+                    self.money_transfer_send(transfer_amount)
+                    print('Success!')
+                else:
+                    print('Not enough money!')
+                    self.logged_menu()
+            else:
+                print('Such a card does not exist.')
+                self.logged_menu()
+        else:
+            print('Probably you made a mistake in the card number. Please try again!')
+        self.logged_menu()
 
     def close_account(self):
-        print('account closed')
-        self.exit()
+        self.cur.execute(f'DELETE FROM card '
+                         f'WHERE'
+                         f'     number = "{self.card_number}";')
+        self.db.commit()
+        print('The account has been closed!')
+        self.main_menu()
 
     def log_out(self):
         print('You have successfully logged out!')
